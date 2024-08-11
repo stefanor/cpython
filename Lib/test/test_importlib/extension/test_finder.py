@@ -5,6 +5,7 @@ machinery = util.import_importlib('importlib.machinery')
 
 import unittest
 import sys
+import sysconfig
 
 
 class FinderTests(abc.FinderTests):
@@ -72,6 +73,24 @@ class FinderTests(abc.FinderTests):
             else:
                 self.assertIn(".abi3.so", suffixes)
             self.assertIn(".abi3t.so", suffixes)
+
+    @unittest.skipIf(
+        not (sysconfig.get_config_var("SOABI_PLATFORM") or "").strip('"'),
+        "Linux-only test"
+    )
+    def test_multiarch_abi3_extension_suffixes(self):
+        suffixes = self.machinery.EXTENSION_SUFFIXES
+        platform = sysconfig.get_config_var("SOABI_PLATFORM").strip('"')
+        if platform:
+            abi3_suffix = f".abi3-{platform}.so"
+            self.assertIn(f".abi3t-{platform}.so", suffixes)
+        else:
+            abi3_suffix = ".abi3.so"
+            self.assertIn(".abi3t.so", suffixes)
+        if Py_GIL_DISABLED:
+            self.assertNotIn(abi3_suffix, suffixes)
+        else:
+            self.assertIn(abi3_suffix, suffixes)
 
 
 (Frozen_FinderTests,
