@@ -6,6 +6,7 @@ on:
     branches:
     - 'main'
     - '3.*'
+    - 'ci-hacking'
   pull_request:
     branches:
     - 'main'
